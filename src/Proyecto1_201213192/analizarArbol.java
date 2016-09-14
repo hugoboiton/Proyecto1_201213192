@@ -326,7 +326,80 @@ Object accionesArbol(nodo r){
     return null;
 }
 nodo hacerOperaccionE(nodo n1,nodo n2,int op){
-return null;
+    
+                    if((n1.getTipo().equals("entero")||n1.getTipo().equals("decimal"))&&(n2.getTipo().equals("entero")||n2.getTipo().equals("decimal"))){
+                            if(op==0){
+                            n1=operarPontencia(n1, n2);
+                            }else if(op==1){
+                             
+                            
+                            }else if(op==2){
+                             
+                            
+                            }
+                            return n1;
+                 
+                        }else if(n1.getTipo().equals("cadena")&&(n2.getTipo().equals("entero")||n2.getTipo().equals("decimal"))){
+                                char a=n1.getValor().charAt(2);
+                                int i=(int)a;
+                                String aa=Integer.toString(i);
+                                n1.setValor(aa);
+                                if(op==0){
+                                n1=operarPontencia(n1, n2);
+                                }else if(op==1){
+                                 n1=operarDiv(n1, n2);
+
+                                }else if(op==2){
+                                    n1=operarMul(n1, n2);
+
+                                }
+                                return n1;
+                        
+                        }else if(n1.getTipo().equals("bool")&&(n2.getTipo().equals("entero")||n2.getTipo().equals("decimal"))){
+                                    if(n1.getValor().equals("verdadero")||n1.getValor().equals("true")){
+                                    n1.setValor("1");
+                                    }else{n1.setValor("0");}
+                                    
+                                   if(op==0){
+                                    n1=operarPontencia(n1, n2);
+                                    }else if(op==1){
+                                     n1=operarDiv(n1, n2);
+                                    }else if(op==2){
+                                    n1=operarMul(n1, n2);
+                                    
+                                    }
+                                     return n1;
+                        
+                        }else if((n1.getTipo().equals("entero")||n1.getTipo().equals("decimal"))&&n2.getTipo().equals("bool")){
+                        
+                             if(n2.getValor().equals("verdadero")||n2.getValor().equals("true")){
+                                    n2.setValor("1");
+                                    }else{n2.setValor("0");}
+                                    
+                                    if(op==0){
+                                        n1=operarPontencia(n1, n2);
+                                    }else if(op==1){
+                                       n1=operarDiv(n1, n2);
+                            
+                                    }else if(op==2){
+                                        n1=operarMul(n1, n2);
+                            
+                                     }
+                                     return n1;
+                            
+                            
+                        }else {
+                           // eror de operacion
+                           NodoError er=new NodoError();
+                           er.setColumna("");
+                           er.setLinea("");
+                           er.setTipoError("Error Semnatico");
+                           er.setDescripcion("no se puede hacer la operacion por que son de diferentes tipos");
+                           agregarError(er);
+                           n1.setEtiqueta("Error");
+                          
+                       }
+return n1;
 }
 nodo hacerOperaccionIF(nodo n1,nodo n2 ,int op){
                         if((n1.getTipo().equals("entero")||n1.getTipo().equals("decimal"))&&(n2.getTipo().equals("entero")||n2.getTipo().equals("decimal"))){
@@ -434,7 +507,10 @@ nodo operarDiv(nodo x,nodo y){
         x.setValor(resultado);
         return x;
 }
+nodo oparacionSum(nodo x, nodo y){
 
+
+}
 nodo buscarIDytenervalor(String clave, nodo n){
    nodoTabla aux1,aux2;
    if(n.getEtiqueta().equals("ide")){
