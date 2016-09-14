@@ -1,0 +1,1235 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  MULTI=true;
+  IGNORE_CASE = true; // (default false)
+  STATIC = false; // (default true) = false;
+  
+  
+}
+
+PARSER_BEGIN(analizador)
+package Analizador;
+
+public class analizador
+{
+  public static void main(String args []) throws ParseException
+  {
+      analizador parser = new analizador(System.in);
+          
+      try
+      {
+        parser.S();
+        System.out.println("correcto");
+      }
+      catch (Exception e)
+      {
+        System.out.println("NOK.");
+        System.out.println(e.getMessage());
+        
+      }
+      catch (Error e)
+      {
+        System.out.println("Oops.");
+        System.out.println(e.getMessage());
+       
+      }
+    
+  }
+}
+
+PARSER_END(analizador)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+SKIP : {
+   ">>" : SINGLE_LINE_COMMENT
+|  "<-" : MULTI_LINE_COMMENT
+}
+
+<SINGLE_LINE_COMMENT> SKIP : {
+  "\n" : DEFAULT
+}
+
+<SINGLE_LINE_COMMENT> MORE : {
+   <~[]>
+}
+<MULTI_LINE_COMMENT> SKIP : {
+  "->" : DEFAULT
+}
+
+<MULTI_LINE_COMMENT> MORE : {
+   <~[]>
+}
+/* PALABRAS RESERVADAS */
+
+TOKEN :
+{
+  <lienzo: "Lienzo" >
+| <publico: "publico" >
+| <privado: "privado" >
+| <protegido: "protegido" >
+| <extiende: "extiende">
+| <conservar: "Conserva">
+| <var: "var">
+| <si:"si">
+| <sino: "sino">
+| <comprobar: "comprobar">
+| <caso:"caso">
+| <defecto:"defecto">
+| <salir: "salir">
+| <continuar:"continuar">
+| <para: "para">
+| <mientras: "mientras">
+| <hacer: "hacer">
+| <retornar: "retorna">
+
+}
+
+/* TIPOS DE DATOS */
+
+TOKEN :
+{
+  <entero:"entero"|"Entero">
+| <decimal:"decimal"|"Descimal">
+| <booleano:"booleano"|"Booleano">
+| <caracter:"caracter"|"Caracter">
+| <cadena:"cadena"|"Cadena">
+| <arreglo: "arreglo"|"Arreglo">
+}
+/*funciones especiales*/
+TOKEN :{
+<pintarP: "Pintar_P">
+| <pintarOR :"Pintar_OR">
+| <pintarS : "Pintar_S">
+| <principal :"Principal">
+| <ordenar : "Ordenar">
+| <asendente: "ascendente">
+| <descendente :"descendente">
+| <pares :"pares">
+| <impares: "impares">
+| <primos :"primos">
+
+}
+
+/* OPERADORES RELACIONALES */
+
+TOKEN :
+{
+  < igualigual: "==" >
+| < diferente: "!=" >
+| < menor: "<" >
+| < menorigual: "<=" >
+| < mayor: ">" >
+| < mayorigual: ">=" >
+| < nulo: "!&¡" >
+}
+
+/* OPERADORES LOGICOS */
+
+TOKEN :
+{
+  < or: "||" >
+| < and: "&&" >
+| < nand: "!&&" >
+| < nor: "!||" >
+| < xor: "&|" >
+| < not: "!" >
+}
+
+/* OPERADORES ARITMETICOS */
+
+TOKEN :
+{
+  < mas: "+" >
+| < menos: "-" >
+| < por: "*" >
+| < divi: "/" >
+| < potencia: "^" >
+| <aumento:"++">
+| <decremento:"--">
+| <sumas:"+=">
+| <restas:"-=">
+}
+
+/* IDENTIFICADORES */
+TOKEN :
+{
+ 
+ <verdadero :("true"|"verdadero")>
+| <falso :("falso"|"false")>
+| <cadenaS: ["\""](~[ "\"" ])+["\""]>
+| <cadenaC: ["\'"](~[ "\'" ])["\'"]>
+| < ide:["a"-"z","A"-"Z"](["a"-"z","A"-"Z"]|["0"-"9"])*>
+| <numero: (["-"]|["."])?(["0"-"9"])+("."(["0"-"9"])+)?>
+
+}
+
+
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  <abrir: "¿" >
+| < cerrar: "?" >
+| < parentecisa: "(" >
+| < parentecisc: ")" >
+| < corchetea: "[">
+| < corchetec: "]">
+| < puntoycoma: ";" >
+| < coma: "," >
+| < punto: "." >
+| <igual: "=">
+| <fin: "$">
+|<llavea:"{">
+|<llavec:"}">
+|<dospuntos:":">
+//|< EPSILON: "">//solo si es necesario
+}
+// inicio gramatica
+nodo S():{nodo e1; }
+{
+    e1=L() <EOF>{
+                    nodo sint = new nodo();
+                    sint.setEtiqueta("S");
+                    nodo ini=(nodo) e1;
+                    sint.agregarHijo(ini);
+                    return sint;
+                }
+}
+nodo L():
+{nodo sint; 
+String tnivel="publico";
+ nodo herencia=null;
+ nodo conte;
+ Token t;
+}
+{
+      (
+        //(tnivel=nivel)* 
+       (tnivel=nivel())? <lienzo> t=<ide> (herencia=extiende())?<abrir> conte =cuerpo() <cerrar>
+          
+      )
+      {
+       sint =new nodo();
+       sint.setEtiqueta("Lienzo");
+       sint.setNivel(tnivel);
+       sint.setValor(t.image.toString());
+       if(herencia!=null){
+       sint.agregarHijo(herencia);}
+       sint.agregarHijo(conte);
+       // System.out.println(tnivel); 
+       return sint;
+       }
+
+}
+ //niveles de pribilegio
+String nivel():{String aux; Token t;}
+{
+  
+ (   t=<publico> 
+    |t=<privado>
+    |t=<protegido>
+)
+{
+     aux=t.image.toString();
+}
+
+ { 
+    
+    return aux;
+  }
+}
+//herencia
+nodo extiende(): 
+{
+   nodo raiz;
+   nodo hijo;
+   Token t;
+}
+{
+  ( <extiende> t=<ide>)
+ {
+      raiz =new nodo();
+      raiz.setEtiqueta("Extiende");
+      hijo =new nodo();
+      hijo.setEtiqueta(t.image.toString());
+      raiz.agregarHijo(hijo);
+    
+  } 
+
+  ( <coma> t=<ide>
+    {
+       hijo =new nodo();
+      hijo.setEtiqueta(t.image.toString());
+      raiz.agregarHijo(hijo);
+    }
+   
+  )*
+  
+  
+
+  
+{
+    
+    return raiz;
+}
+}
+// cuerpo del lienzo
+nodo cuerpo():{
+       nodo r=new nodo();
+       r.setEtiqueta("cuerpo"); 
+       nodo hijo;
+       
+}
+{  
+    
+   (  LOOKAHEAD(2) 
+     
+    hijo=MetodoFuncion() 
+    
+     {  r.agregarHijo(hijo); }
+    | hijo=V()
+    {r.agregarHijo(hijo); }
+    |hijo=principal()
+    {r.agregarHijo(hijo);}
+   )+
+
+
+  {
+   return r;
+  }
+}
+
+
+nodo V():{nodo r;}
+{
+    (//LOOKAHEAD(2) 
+        r=variable() <fin>
+        //|r =vector() <fin>)
+      //|r =asingnacion() <fin>
+    )
+   
+    {return r;}
+}
+   
+
+
+// declaracion de variables
+nodo variable():{nodo r; String tipo,nivelv="publico"; nodo hijo; nodo e=null;nodo tamano=null;nodo valor=null;Token t,t1=null;}
+{
+
+     (  
+       (nivelv=nivel())?(<conservar>)?  <var> tipo=tipoVariable()  (t1=<arreglo>)? t=<ide> (tamano=tamanoV())? (<igual> ( e=E() |valor=valoresV()))?//t=<ide> (<igual> e=E())?
+      {
+        r=new nodo();
+        r.setEtiqueta("variables");
+       // hijo=new nodo();
+
+       if(t1==null){
+         hijo=new nodo();
+         hijo.setEtiqueta("variable");
+         hijo.setTipo(tipo);
+         hijo.setValor(t.image.toString());
+         hijo.setNivel(nivelv);
+         if(e!=null){
+         hijo.agregarHijo(e);
+         }
+         r.agregarHijo(hijo);
+
+         }else{
+         hijo=new nodo();
+         hijo.setEtiqueta("arreglo");
+         hijo.setValor(t.image.toString());
+         hijo.setTipo(tipo);
+         hijo.agregarHijo(tamano);
+         hijo.setNivel(nivelv);
+         if(valor!=null){
+         hijo.agregarHijo(valor);}
+         r=hijo;
+          }
+       
+
+     }
+     (
+       <coma> t=<ide> (<igual> e=E())?
+      {
+       if(t1==null){
+        hijo=new nodo();
+        hijo.setEtiqueta("variable");
+        hijo.setTipo(tipo);
+        hijo.setValor(t.image.toString());
+        hijo.setNivel(nivelv);
+        if(e!=null){
+        hijo.agregarHijo(e);}
+        r.agregarHijo(hijo);}
+      }
+     )*   
+     |r =asingnacion()
+  
+   )
+    
+
+  {
+   return r;
+  }
+}
+// tipos de variables
+String tipoVariable():{String aux=""; Token t;}
+{   
+ (
+    t=<entero>{aux="entero";}
+    |t=<decimal>{aux="decimal";}
+    |t=<cadena>{aux="cadena";}
+    |t=<caracter>{aux="cacarter";}
+    |t=<booleano>{aux="bool";} 
+  
+ )
+
+{
+    return aux;
+
+}
+}
+
+
+//asignar valor a variable
+nodo asingnacion():{nodo r; nodo e; nodo  tamano=null; Token t;}
+{
+  ( LOOKAHEAD(2)
+     t=<ide> (tamano=tamanoV())?<igual> e=E()
+   {
+        if (tamano==null){
+        r= new nodo();
+        r.setEtiqueta("valor variable");
+        r.setValor(t.image.toString());
+        r.agregarHijo(e);
+        } 
+        else{
+             r=new nodo();
+       r.setEtiqueta("valor vector");
+       r.setValor(t.image.toString());
+       r.agregarHijo(tamano);
+       r.agregarHijo(e);
+       }
+
+   }
+   |r=ff()   
+    )
+   {
+        return r;
+   }
+
+}
+
+// asignar tamoño vector
+nodo tamanoV():{nodo r; nodo tamano;}
+{
+   (< corchetea>  tamano=E() < corchetec>
+    {
+        r=new nodo();
+        r.setEtiqueta("Tamano");
+        r.agregarHijo(tamano);
+
+    }
+    (< corchetea> tamano=E() < corchetec>
+    {
+         r.agregarHijo(tamano);
+
+    }
+
+
+    )*
+
+    )
+    {
+     return r;
+    }
+
+
+}
+nodo valoresV():{nodo r;} 
+{
+
+    ( 
+        <llavea> r = C()<llavec>
+    )
+    {
+        return r;
+    }
+}
+
+nodo C(): {nodo r;}
+{
+     (
+        r=C1()
+       |r=C2()
+     )
+
+    {
+        return r;
+    }
+}
+
+nodo C1():{ nodo r; nodo hijo;}
+{
+    (
+       hijo=E()
+       {
+        r=new nodo();
+        r.setEtiqueta("Valores Vector");
+        r.agregarHijo(hijo);
+       }
+       (
+         <coma> hijo=E()
+        {
+          r.agregarHijo(hijo);
+        }
+        )*
+    )
+    {
+        return r;
+    }
+}
+
+nodo C2():{nodo r; nodo hijo;}
+{
+    (
+       /*<llavea>*/ hijo=valoresV() /*<llavec>*/
+       {
+          r=new nodo();
+          r.setEtiqueta("Lista valores");
+          r.agregarHijo(hijo);
+
+       }
+       (
+          <coma> /* <llavea>*/ hijo=valoresV() /*<llavec>*/
+          {
+            r.agregarHijo(hijo); 
+           }
+        
+        )*
+    )
+    {
+        return r;
+    }
+}
+// operaciones logicas
+nodo logica():{nodo r; nodo r1; nodo r2;}
+{
+  ( r1 =relacional2()
+    {
+       r=new nodo();
+       r.setEtiqueta("logica");
+       r.agregarHijo(r1);
+    }
+    (
+       <or> r2=relacional2()
+       {r.agregarHijo(r2);
+        r.setValor("or");
+
+       }
+      |<and> r2=relacional2()
+       {r.agregarHijo(r2);
+        r.setValor("and");
+
+       }
+       |<nand> r2=relacional2()
+       {r.agregarHijo(r2);
+        r.setValor("nand");
+
+       } 
+        |<nor> r2=relacional2()
+       {r.agregarHijo(r2);
+        r.setValor("nor");
+
+       }
+        |<xor> r2=relacional2()
+       {r.agregarHijo(r2);
+        r.setValor("xor");
+
+       }
+    )*
+    )
+
+ {return r;}
+}
+
+nodo relacional2():{nodo r; nodo r1;}
+{
+    ( LOOKAHEAD(3)
+      r1 =relacional()
+     {  
+       r=new nodo();
+       r.setEtiqueta("logica");
+       r.agregarHijo(r1);
+     }
+     | <not> r1=relacional()
+       {
+       r=new nodo();
+       r.setEtiqueta("logica");
+       r.setValor("not");
+        r.agregarHijo(r1);
+       }
+     |<parentecisa> r=logica() <parentecisc>
+
+    )
+    {return r;}
+}
+//opreciones relacionales
+nodo relacional():{nodo r; String opp; nodo e1;nodo e2;}
+{
+ ( e1=E() opp=op() e2=E()
+  {
+      r=new nodo();
+      r.setEtiqueta("relacion");
+      r.agregarHijo(e1);
+      r.agregarHijo(e2);
+      r.setValor(opp);
+   }
+  | opp=op() e1=E()
+   {
+      r=new nodo();
+      r.setEtiqueta("relacion");
+      r.agregarHijo(e1);
+      //r.agregarHijo(e2);
+      r.setValor(opp);
+    }
+
+)  
+{return r;}
+
+}
+
+//nodo op
+
+String op():{String r;}
+{  
+  (<igualigual>{r="==";}  
+ |<diferente>{r="!=";}
+ |<menor>{r="<";}
+ |<menorigual>{r="<=";}
+ |<mayor>{r=">";}
+ |<mayorigual>{r=">=";}
+ |<nulo> {r="!&¡";})
+  {return r;}
+}
+//producciones de artimetiac y numeros
+nodo E():
+{nodo r; nodo t1; nodo t2; nodo op; }
+{
+   t1=T()
+   {
+     r =new nodo();
+     r.setEtiqueta("E");
+     r.agregarHijo(t1);
+
+   }
+   (
+      <mas> t2=T() 
+     {
+        op=new nodo();
+        op.setEtiqueta("mas");
+        r.agregarHijo(op);
+        r.agregarHijo(t2);
+     }
+     |<menos> t2=T()
+     {
+        op=new nodo();
+        op.setEtiqueta("menos");
+        r.agregarHijo(op);
+        r.agregarHijo(t2);
+     
+    }
+    )*
+{
+    return r;
+}
+}
+nodo T():{nodo r; nodo f1; nodo f2; nodo op;} 
+{
+   f1=I()
+   {
+     r =new nodo();
+     r.setEtiqueta("T");
+     r.agregarHijo(f1);
+   }
+  (    
+    <por> f2=I()
+    {
+        op=new nodo();
+        op.setEtiqueta("por");
+        r.agregarHijo(op);
+        r.agregarHijo(f2);
+    }
+    |<divi> f2=I()
+    {
+        op=new nodo();
+        op.setEtiqueta("dividir");
+        r.agregarHijo(op);
+        r.agregarHijo(f2);
+    }
+  
+   )*
+   {
+        return r;
+   }
+
+}
+
+nodo I():{nodo r; nodo f1; nodo f2; nodo op;}
+{
+     ( f1=F()
+       {
+          r=new nodo();
+          r.setEtiqueta("I");
+          r.agregarHijo(f1);
+       }
+       (   
+          <potencia> f2=F()
+          {
+             op=new nodo();
+             op.setEtiqueta("potencia");
+             r.agregarHijo(f1);
+             r.agregarHijo(f2);
+          }
+       )*
+    
+     )
+
+     {
+        return r;
+       }
+}
+ 
+nodo F ():{nodo r;  Token t;}
+{
+   (t=<numero>
+    {
+      r=new nodo();
+      r.setEtiqueta("numero");
+      r.setValor(t.image.toString());
+    } 
+    
+    |t=<cadenaS>
+    {
+        r=new nodo();
+        r.setEtiqueta("cadena");
+        r.setValor(t.image.toString());
+    }
+    |t=<cadenaC>
+    {
+        r=new nodo();
+        r.setEtiqueta("caracter");
+        r.setValor(t.image.toString());
+    }
+    |t=<verdadero>
+    {
+        r=new nodo();
+        r.setEtiqueta("verdadero");
+        r.setValor(t.image.toString());
+    }
+    |t=<falso> 
+    {
+        r=new nodo();
+        r.setEtiqueta("falso");
+        r.setValor(t.image.toString());
+   
+    }
+    |r= VectorE()
+    
+    |<parentecisa> r=E() <parentecisc>
+    
+   )
+   {
+    return r;
+   }
+
+}
+// reprecia a funcones y ids
+nodo VectorE():{Token t,t2=null; nodo tamano=null; nodo r;nodo parametros=null;}
+{
+    (t=<ide> (tamano=tamanoV() | t2=<parentecisa> (parametros=llparametro())?<parentecisc>)?
+     {
+            if(tamano!=null){
+            r=new nodo();
+            r.setEtiqueta("valor vector pocion");
+            r.setValor(t.image.toString());
+            r.agregarHijo(tamano);
+            }else if(t2!=null){
+                r=new nodo();
+                r.setEtiqueta("llamdaF");
+                r.setValor(t.image.toString());
+                if(parametros!=null){
+                r.agregarHijo(parametros);}
+            }else {
+             r=new nodo();
+             r.setEtiqueta("ide");
+             r.setValor(t.image.toString());
+         }
+    }
+   
+    )
+
+
+  {
+       return r;
+   }
+}
+
+// creacion de metodos y funciones
+
+nodo MetodoFuncion():{ nodo r; String tipo="null",nivelv=""; Token nombre;nodo cuerpoMF=null; nodo parametro=null;nodo retorno=null; String a="";}
+{
+   ((nivelv=nivel())? ( <conservar>)?(tipo=tipoVariable())?(corchetesF())? nombre=<ide>  <parentecisa> ( parametro=ListaParametors())? <parentecisc> <abrir> cuerpoMF=listaSentecias() (retorno=regreso())?<cerrar>
+    {
+          if(tipo.equalsIgnoreCase("null")){
+           r=new nodo();
+           r.setEtiqueta("metodo");
+           r.setValor(nombre.image.toString());
+           if(parametro!=null){
+           r.agregarHijo(parametro);}
+           r.agregarHijo(cuerpoMF);
+           
+
+        }else{   
+
+           r=new nodo();
+           r.setEtiqueta("funcion");
+           r.setValor(nombre.image.toString());
+           r.setTipo(tipo);
+           if(parametro!=null){
+           r.agregarHijo(parametro);}
+           r.agregarHijo(cuerpoMF);
+           if(retorno!=null){
+           r.agregarHijo(retorno);}
+         }
+
+    }
+
+   )
+    {
+        return r;
+        }
+}
+
+String corchetesF():{String r;}
+{
+   <corchetea> <corchetec>
+    {
+
+        return "si";
+    }
+    
+}
+nodo ListaParametors():{nodo r; String tipo; Token t;nodo hijo;}
+{
+    (
+        tipo=tipoVariable() t=<ide>
+        {
+                r=new nodo();
+                r.setEtiqueta("lista parametros");
+                hijo =new nodo();
+                hijo.setEtiqueta("parametro");
+                hijo.setValor(t.image.toString());
+                r.agregarHijo(hijo);
+        }
+        ( <coma>  tipo=tipoVariable() t=<ide>
+            {
+                 hijo =new nodo();
+                hijo.setEtiqueta("parametro");
+                hijo.setValor(t.image.toString());
+                r.agregarHijo(hijo);
+            }
+        )*
+        
+    )
+    {return r;}
+}
+nodo regreso(): {nodo r; Token t;}
+{
+    (  <retornar> t=<ide> <fin>
+        {
+            r=new nodo();
+            r.setEtiqueta("retorno");
+            r.setValor(t.image.toString());
+        }
+    )
+
+        {return r;}
+}
+// lisa de sentencias
+nodo listaSentecias():{nodo r; nodo hijo;}
+{
+    (
+         hijo=sentencia()
+        {
+            r=new nodo();
+            r.setEtiqueta("lista sentecias");
+            r.agregarHijo(hijo);
+
+        }
+       (
+        hijo=sentencia()
+       { r.agregarHijo(hijo);}
+       
+      )*
+
+
+
+    )
+
+
+      {return r;}
+}
+nodo sentencia(): {nodo r;}
+{
+       
+     ( 
+       r= si()
+       |r= comprobar()
+       |r= paracada()
+       |r= hacermientras()
+       |r=mientras()
+       |r= variable() <fin>
+       |r=pintaror()
+       |r=pintarss()
+       |r=pintarpunto()
+       |r=ssalida() <fin>
+       |r=scontinuar() <fin>
+       |r=ordenarV()
+
+        )
+      {return r;}
+}
+//sentencia if 
+nodo si():{nodo r; nodo hijo; nodo sen=null; nodo condi;}
+{   (
+      <si> <parentecisa> condi=logica() <parentecisc> <abrir> sen=listaSentecias() <cerrar>
+      {
+           r=new nodo();
+           r.setEtiqueta("si");
+           r.agregarHijo(condi);
+           r.agregarHijo(sen);
+
+       } 
+      (
+        <sino> <parentecisa> condi=logica() <parentecisc> <abrir> sen=listaSentecias() <cerrar>
+        {
+           hijo=new nodo();
+           hijo.setEtiqueta("sino");
+           hijo.agregarHijo(condi);
+           hijo.agregarHijo(sen);
+           r.agregarHijo(hijo);
+
+        }
+      )*
+       
+    )
+    {return r;}
+}
+//sentencia comprobar
+nodo comprobar():{nodo r; nodo buscar; nodo hijo;}
+{
+    (
+      <comprobar> <parentecisa> buscar=E() <parentecisc> <abrir>  hijo=lcomprobar() <cerrar>
+      { 
+        r=new nodo();
+        r.setEtiqueta("comprobar");
+        r.agregarHijo(buscar);
+        r.agregarHijo(hijo);
+       }
+     )
+    {return r;}
+}
+ nodo lcomprobar():{nodo r =new nodo(); r.setEtiqueta("lista casos"); nodo hijo; nodo var; Token t=null; nodo sen;}
+{   
+    (
+      <caso> var=E() <dospuntos> sen=listaSentecias() 
+        {
+           hijo =new nodo();
+           hijo.setEtiqueta("caso");
+           hijo.agregarHijo(var);
+           hijo.agregarHijo(sen);
+           r.agregarHijo(hijo);   
+        }
+     (
+        <caso> var=E() <dospuntos>  sen=listaSentecias() 
+        {
+           hijo =new nodo();
+           hijo.setEtiqueta("caso");
+           hijo.agregarHijo(var);
+            hijo.agregarHijo(sen);
+          r.agregarHijo(hijo);  
+        }
+        |<defecto> <dospuntos> sen=listaSentecias() 
+        {
+                hijo =new nodo();
+                hijo.setEtiqueta("defavol");
+                 hijo.agregarHijo(sen);
+                r.agregarHijo(hijo);
+            }  
+    )*
+        
+    )
+     
+    {return r;}
+}
+//sentencia paracada
+nodo paracada():{nodo r; nodo vari; nodo condi;nodo f; nodo sen;}
+{
+   ( <para> <parentecisa> vari=variable() <puntoycoma> condi=logica() <puntoycoma>  f=ff()<parentecisc> <abrir> sen=listaSentecias() <cerrar>
+       { r=new nodo();
+        r.setEtiqueta("paracada");
+        r.agregarHijo(vari);
+        r.agregarHijo(condi);
+        r.agregarHijo(f);
+        r.agregarHijo(sen);}
+          
+    )
+   
+    {return r;}
+
+}
+
+nodo ff():{ Token t,t2; nodo tt; String nom; String eti;nodo e=null;}
+{     /*| <sumas:"+=">
+| <restas:"-=">*/
+    (   LOOKAHEAD(2) 
+        t=<ide> (t2=<aumento>|t2=<decremento>|t2=<sumas>|t2=<restas>) (e=E())?
+        {
+            nom=t.image.toString();
+            eti=t2.image.toString();
+          if(e==null){  
+            if(eti.equals("++"))
+            {
+               tt=new nodo();
+               tt.setEtiqueta("Aumento");
+               tt.setValor(nom);
+            }
+            else{
+                tt=new nodo();
+                tt.setEtiqueta("decremento");
+                tt.setValor(nom);
+                }
+         }else {
+            if(eti.equals("+="))
+            {
+               tt=new nodo();
+               tt.setEtiqueta("sumas");
+               tt.setValor(nom);
+               tt.agregarHijo(e);
+            }
+            else{
+                tt=new nodo();
+                tt.setEtiqueta("restas");
+                tt.setValor(nom);
+                tt.agregarHijo(e);
+                }
+
+             }
+        }
+       |tt=llamarMF()
+        
+    )
+    {return tt;}
+}
+// do while
+nodo hacermientras():{ nodo r; nodo sen ; nodo cond;}
+{
+    (
+        <hacer> <abrir>sen=listaSentecias()<cerrar> <mientras> <parentecisa> cond=logica() <parentecisc> <fin>
+        {
+            r=new nodo();
+            r.setEtiqueta("hacermientras");
+            r.agregarHijo(sen);
+            r.agregarHijo(cond);
+           }
+    )
+    {return r;}
+
+}
+
+nodo mientras():{nodo r; nodo sen; nodo cond;}
+{
+    (
+        <mientras> <parentecisa> cond=logica() <parentecisc> <abrir> sen=listaSentecias() <cerrar>
+        {
+             r=new nodo();
+            r.setEtiqueta("mientras");
+            r.agregarHijo(cond);
+            r.agregarHijo(sen);
+
+        }
+    )
+    { return r;}
+}
+nodo llamarMF():{nodo r; nodo parametros=null;}
+{
+
+    (  
+      <ide> <parentecisa> (parametros=llparametro())?<parentecisc>
+      {
+        r=new nodo();
+        r.setEtiqueta("llamarM");
+        if(parametros!=null){
+        r.agregarHijo(parametros);}
+        
+        }
+      
+    )
+    {return r;}
+}
+nodo llparametro():{nodo r =new nodo(); r.setEtiqueta("llParametos"); nodo hijo;}
+{
+    (
+        hijo =E()
+        {
+            r.agregarHijo(hijo);
+        }
+        (
+            <coma> hijo=E()
+           {
+                r.agregarHijo(hijo);
+            }
+         )*
+    
+    )
+    {return r;}
+}
+// Pintar_P(posición en X, posición en Y, color, Diámetro)$
+/*<pintarP: "Pintar_P">
+| <pintarOR :"Pintar_OR">
+| <pintarS : "Pintar_S">
+| <principal :"Principal">*/
+nodo pintarpunto():{nodo r; nodo x;nodo y; Token t; nodo d;}
+{
+    ( <pintarP> <parentecisa> x=E() <coma> y=E() <coma> t=<cadenaS> <coma> d=E() <parentecisc><fin>
+      {
+            r=new nodo();
+            r.setEtiqueta("punto");
+            r.setValor(t.image.toString());
+            r.agregarHijo(x);
+            r.agregarHijo(y);
+            r.agregarHijo(d);
+        }  
+    )
+    {return r;}
+
+}
+//Pintar_OR(posición en X, posición en Y, color, Ancho, Alto, figura)$
+nodo pintaror():{nodo r; nodo x;nodo y; Token t,t2; nodo an; nodo al;}
+{
+    ( <pintarOR> <parentecisa> x=E() <coma> y=E() <coma> t=<cadenaS> <coma> an=E()<coma> al=E() <coma> t2=<cadenaC> <parentecisc> <fin>
+      {
+            r=new nodo();
+            r.setEtiqueta("or");
+            r.setValor(t.image.toString());
+            r.agregarHijo(x);
+            r.agregarHijo(y);
+            r.agregarHijo(an);
+            r.agregarHijo(al);
+            r.setTipo(t2.image.toString());
+        }  
+          
+    )
+    {return r;}
+
+}
+//Pintar_S(100,100, “#000000”, “Hola mundo”)$
+nodo pintarss():{nodo r; nodo x; nodo y,d; Token t,t2;}
+{
+    ( <pintarS> <parentecisa> x=E() <coma> y=E() <coma> t=<cadenaS> <coma> t2=<cadenaS> <parentecisc> <fin>
+    {
+         r=new nodo();
+            r.setEtiqueta("cadena");
+            r.setValor(t.image.toString());
+            r.agregarHijo(x);
+            r.agregarHijo(y);
+            r.setTipo(t2.image.toString());
+    }
+    )
+    {return r;}
+}
+nodo principal():{nodo r; nodo metodos;}
+{
+    (
+     <principal> <parentecisa> <parentecisc> <abrir> metodos=listaSentecias() <cerrar>
+     {
+        r=new nodo();
+        r.setEtiqueta("principal");
+        r.agregarHijo(metodos);
+
+    }
+    )
+    {return r;}
+}
+nodo ssalida():{nodo r;}
+{
+    (
+        <salir> 
+        {
+            r=new nodo();
+            r.setEtiqueta("salir");
+
+        }
+       
+    )
+    {return r;}
+}
+nodo scontinuar():{nodo r;}
+{
+    (<continuar>
+        {
+             r=new nodo();
+            r.setEtiqueta("continuar");
+
+        }
+    )
+    {return r;}
+}
+//Ordenar (arreglo <arreglo a ordenar>,tipo <forma de ordenar>)
+ /*
+    | <ordenar : "Ordenar">
+| <asendente: "ascendente">
+| <descendente :"descendente">
+| <pares :"pares">
+| <impares: "impares">
+| <primos :"primos">
+*/
+nodo ordenarV():{nodo r;Token t; String orden;}
+{
+    (
+      <ordenar> <parentecisa> t=<ide> orden=tipoOrden() <parentecisc> <fin>
+      {
+        r=new nodo();
+        r.setEtiqueta("ordenar v");
+        r.setValor(t.image.toString());
+        r.setTipo(orden);
+
+      }
+  )
+    {return r;}
+}
+//ss
+String tipoOrden():{String r; Token t;}
+{
+
+    (
+        t=<asendente>{r=t.image.toString();}
+        |t=<descendente>{r=t.image.toString();}
+        |t=<pares>{r=t.image.toString();}
+        |t=<impares>{r=t.image.toString();}
+        |t=<primos>{r=t.image.toString();}
+
+    )
+    {return r;}
+}
